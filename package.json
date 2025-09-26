@@ -1,0 +1,19 @@
+{
+"name": "electron-music-app",
+"version": "1.0.0",
+"main": "main.js",
+"scripts": {
+"start": "electron .",
+"desktop": "electron .",
+"web": "node server.js",
+"dev": "node server.js"
+},
+"dependencies": {
+"express": "^4.18.2",
+"cors": "^2.8.5",
+"body-parser": "^1.20.2"
+},
+"devDependencies": {
+"electron": "^29.0.0"
+}
+}

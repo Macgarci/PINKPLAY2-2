@@ -1,0 +1,125 @@
+{
+  "users": [
+    {
+      "id": "u_demo",
+      "email": "demo@demo.com",
+      "name": "Demo User",
+      "passwordHash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"
+    },
+    {
+      "id": "u_4dcy23o",
+      "name": "Melanie Cruz",
+      "email": "macgarcia61@gmail-com",
+      "passwordHash": "11063f7be86ded84ed6ef0468f0fe0a32d670bd3f2fb237d93cf85ab05c30883"
+    },
+    {
+      "id": "u_txhrcke",
+      "name": "Adriana Cruz",
+      "email": "melanieadria12@gmail.com",
+      "passwordHash": "11063f7be86ded84ed6ef0468f0fe0a32d670bd3f2fb237d93cf85ab05c30883"
+    }
+  ],
+  "songs": [
+    {
+      "id": "s1",
+      "title": "Blinding Lights",
+      "artist": "The Weeknd",
+      "duration": "3:20"
+    },
+    {
+      "id": "s2",
+      "title": "Watermelon Sugar",
+      "artist": "Harry Styles",
+      "duration": "2:54"
+    },
+    {
+      "id": "s3",
+      "title": "Levitating",
+      "artist": "Dua Lipa",
+      "duration": "3:23"
+    },
+    {
+      "id": "s4",
+      "title": "Good 4 U",
+      "artist": "Olivia Rodrigo",
+      "duration": "2:58"
+    },
+    {
+      "id": "s5",
+      "title": "Stay",
+      "artist": "The Kid LAROI & Justin Bieber",
+      "duration": "2:21"
+    },
+    {
+      "id": "s6",
+      "title": "Industry Baby",
+      "artist": "Lil Nas X & Jack Harlow",
+      "duration": "3:32"
+    },
+    {
+      "id": "s7",
+      "title": "Heat Waves",
+      "artist": "Glass Animals",
+      "duration": "3:58"
+    },
+    {
+      "id": "s8",
+      "title": "As It Was",
+      "artist": "Harry Styles",
+      "duration": "2:47"
+    }
+  ],
+  "playlists": [
+    {
+      "id": "p1",
+      "ownerId": "u_demo",
+      "name": "Mis Favoritas",
+      "songIds": [
+        "s1",
+        "s3",
+        "s7"
+      ]
+    },
+    {
+      "id": "p2",
+      "ownerId": "u_demo",
+      "name": "Pop Hits",
+      "songIds": [
+        "s2",
+        "s4",
+        "s8"
+      ]
+    },
+    {
+      "id": "p1758888305488",
+      "name": "YO PUEDO",
+      "ownerId": "u_txhrcke",
+      "songIds": [
+        "s1",
+        "s2"
+      ]
+    }
+  ],
+  "favorites": [
+    {
+      "ownerId": "u_demo",
+      "songId": "s1"
+    },
+    {
+      "ownerId": "u_demo",
+      "songId": "s3"
+    },
+    {
+      "ownerId": "u_demo",
+      "songId": "s7"
+    },
+    {
+      "ownerId": "u_4dcy23o",
+      "songId": "s1"
+    },
+    {
+      "ownerId": "u_txhrcke",
+      "songId": "s1"
+    }
+  ]
+}
