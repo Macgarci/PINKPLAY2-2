@@ -58,18 +58,18 @@ root.innerHTML = `<div class="auth-container">
 </div>
 </div>`;
 
-// Tab functionality
+// Funcionalidad de pestañas
 document.getElementById('login-tab').onclick = () => switchTab('login');
 document.getElementById('register-tab').onclick = () => switchTab('register');
 
 function switchTab(tab) {
-// Update tab buttons
-document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-document.getElementById(`${tab}-tab`).classList.add('active');
+  // Actualizar botones de pestañas
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(`${tab}-tab`).classList.add('active');
 
-// Update forms
-document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
-document.getElementById(`${tab}-form`).classList.add('active');
+  // Actualizar formularios
+  document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+  document.getElementById(`${tab}-form`).classList.add('active');
 }
 
 
@@ -101,7 +101,13 @@ root.innerHTML=`
 </div>
 <button id="nav-songs"><i class="fas fa-music"></i> Canciones</button>
 <button id="nav-playlists"><i class="fas fa-list"></i> Playlists</button>
+<button id="nav-stats"><i class="fas fa-chart-bar"></i> Estadísticas</button>
 <button id="nav-favorites"><i class="fas fa-star"></i> Favoritos</button>
+
+<!-- Moved export buttons into sidebar as regular buttons -->
+<button id="export-json"><i class="fas fa-file-export"></i> Exportar JSON</button>
+<button id="export-csv"><i class="fas fa-file-csv"></i> Exportar CSV</button>
+
 <button id="logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
 </div>
 <div class="main" id="view-root"></div>`;
@@ -109,12 +115,18 @@ root.innerHTML=`
 
 document.getElementById('nav-songs').onclick=()=>renderView('songs');
 document.getElementById('nav-playlists').onclick=()=>renderView('playlists');
+document.getElementById('nav-stats').onclick=()=>renderView('stats');
 document.getElementById('nav-favorites').onclick=()=>renderView('favorites');
 document.getElementById('logout').onclick=()=>{ localStorage.removeItem('musicApp_currentUser'); currentUser=null; renderAuth(); };
+
+// Registrar handlers de exportación (botones ahora están en la barra lateral)
+document.getElementById('export-json').onclick = () => exportJSON();
+document.getElementById('export-csv').onclick = () => exportCSV();
 }
 
 function updateActiveNav() {
-  document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
+  // Solo considerar botones de navegación cuyo id empieza con "nav-"
+  document.querySelectorAll('.sidebar button[id^="nav-"]').forEach(btn => btn.classList.remove('active'));
   const activeBtn = document.getElementById(`nav-${currentView}`);
   if (activeBtn) activeBtn.classList.add('active');
 }
@@ -126,6 +138,7 @@ const rootView=document.getElementById('view-root');
 if(view==='songs') renderSongs(rootView);
 if(view==='playlists') renderPlaylists(rootView);
 if(view==='favorites') renderFavorites(rootView);
+if(view==='stats') renderStats(rootView);
 }
 
 
@@ -144,7 +157,7 @@ const list=document.createElement('div');
 list.style.marginTop = '20px';
 rootView.appendChild(list);
 
-// Add song modal functionality
+// Funcionalidad modal: agregar canción
 document.getElementById('add-song-btn').onclick = () => showAddSongModal();
 
 function showAddSongModal() {
@@ -195,7 +208,7 @@ modal.remove();
 redraw();
 };
 
-// Close on outside click
+// Cerrar al hacer clic fuera
 modal.onclick = (e) => {
 if (e.target === modal) modal.remove();
 };
@@ -224,17 +237,17 @@ div.innerHTML=`
 </div>
 `;
 
-// Favorite toggle
+// Alternar favorito
 div.querySelector('.small').onclick=async()=>{
 if(fav) state.favorites=state.favorites.filter(f=>!(f.songId===s.id&&f.ownerId===currentUser.id));
 else state.favorites.push({ ownerId:currentUser.id, songId:s.id });
 await saveData(); redraw();
 };
 
-// Edit song
+// Editar canción
 div.querySelector('.edit-btn').onclick = () => editSong(s);
 
-// Delete song
+// Eliminar canción
 div.querySelector('.delete-btn').onclick = async () => {
 if(confirm(`¿Eliminar "${s.title}"?`)) {
 state.songs = state.songs.filter(song => song.id !== s.id);
@@ -320,7 +333,7 @@ const list=document.createElement('div');
 list.style.marginTop = '20px';
 rootView.appendChild(list);
 
-// Connect add playlist button
+// Conectar botón de crear playlist
 document.getElementById('add-playlist-btn').onclick = () => showAddPlaylistModal();
 
 function redraw(){
@@ -427,7 +440,7 @@ modal.innerHTML = `
 `;
 document.body.appendChild(modal);
 
-// Populate song selection
+// Poblar selección de canciones
 const songSelection = document.getElementById('song-selection');
 state.songs.forEach(song => {
 const div = document.createElement('div');
@@ -474,7 +487,7 @@ if (e.target === modal) modal.remove();
 };
 }
 
-// Enhanced Playlist Management Functions
+// Funciones mejoradas de gestión de playlists
 window.showPlaylistDetails = function(playlistId) {
 const playlist = state.playlists.find(p => p.id === playlistId);
 if (!playlist) return;
@@ -617,7 +630,7 @@ modal.innerHTML = `
 `;
 document.body.appendChild(modal);
 
-// Populate available songs
+// Poblar canciones disponibles
 function updateAvailableSongs(searchTerm = '') {
 const availableList = document.getElementById('available-songs-list');
 const availableSongs = state.songs.filter(song => {
@@ -730,6 +743,210 @@ totalSeconds += parseInt(parts[0]) * 60 + parseInt(parts[1] || 0);
 const minutes = Math.floor(totalSeconds / 60);
 const seconds = totalSeconds % 60;
 return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// --- Export helpers and functions added below ---
+
+function downloadFile(filename, content, mimeType='text/plain') {
+	// Si estamos en modo desktop y la API lo permite, delegamos al host
+	if (isDesktop()) {
+		try {
+			// Si la API devuelve una promesa, manejamosla; si no, simplemente llamamos
+			const res = window.appAPI.saveFile && window.appAPI.saveFile(filename, content, mimeType);
+			if (res && typeof res.then === 'function') {
+				res.then(() => console.debug('saveFile success', filename)).catch(err => console.error('saveFile error', err));
+			}
+			return;
+		} catch (err) {
+			console.error('appAPI.saveFile failed, falling back to browser download', err);
+			// fallthrough a la descarga por blob
+		}
+	}
+
+	// Fallback: descarga por Blob (web)
+	let blob;
+	if (content instanceof Blob) {
+		blob = content;
+	} else {
+		try {
+			blob = new Blob([content], { type: mimeType });
+		} catch (e) {
+			// IE fallback
+			if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+				window.navigator.msSaveOrOpenBlob(new Blob([content], { type: mimeType }), filename);
+				return;
+			}
+			console.error('Unable to create blob for download', e);
+			return;
+		}
+	}
+
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement('a');
+	a.href = url;
+	a.download = filename;
+	// algunos navegadores necesitan que el enlace esté en el DOM
+	document.body.appendChild(a);
+
+	// trigger
+	a.click();
+
+	// Dejar tiempo para que el navegador inicie la descarga antes de revocar la URL
+	setTimeout(() => {
+		try { URL.revokeObjectURL(url); } catch (e) { /* ignore */ }
+		if (a && a.parentNode) a.parentNode.removeChild(a);
+	}, 1000);
+
+	// pequeño log para depuración si sigue fallando
+	console.debug('downloadFile (browser):', filename, 'sizeBytes=', blob.size);
+}
+
+function exportJSON() {
+	try {
+		const filename = `musicpink-export-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.json`;
+		const content = JSON.stringify(state, null, 2);
+		downloadFile(filename, content, 'application/json');
+	} catch (err) {
+		alert('Error al exportar JSON: ' + err.message);
+	}
+}
+
+function csvEscape(value) {
+	const s = value == null ? '' : String(value);
+	// Escape double quotes by doubling them, wrap in quotes
+	return `"${s.replace(/"/g, '""')}"`;
+}
+
+function exportCSV() {
+	try {
+	
+		const songsHeader = ['id','title','artist','duration'];
+		const songsRows = state.songs.map(s => [
+			csvEscape(s.id),
+			csvEscape(s.title),
+			csvEscape(s.artist),
+			csvEscape(s.duration || '')
+		].join(','));
+		const songsCsv = songsHeader.join(',') + '\n' + songsRows.join('\n');
+		downloadFile(`songs-${new Date().toISOString().slice(0,10)}.csv`, songsCsv, 'text/csv');
+
+		const playlistsHeader = ['id','name','ownerId','songIds'];
+		const playlistsRows = state.playlists.map(p => [
+			csvEscape(p.id),
+			csvEscape(p.name),
+			csvEscape(p.ownerId),
+			csvEscape((p.songIds || []).join(';'))
+		].join(','));
+		const playlistsCsv = playlistsHeader.join(',') + '\n' + playlistsRows.join('\n');
+		downloadFile(`playlists-${new Date().toISOString().slice(0,10)}.csv`, playlistsCsv, 'text/csv');
+
+
+		const favHeader = ['ownerId','songId'];
+		const favRows = state.favorites.map(f => [
+			csvEscape(f.ownerId),
+			csvEscape(f.songId)
+		].join(','));
+		const favCsv = favHeader.join(',') + '\n' + favRows.join('\n');
+		downloadFile(`favorites-${new Date().toISOString().slice(0,10)}.csv`, favCsv, 'text/csv');
+
+		const usersHeader = ['id','name','email'];
+		const usersRows = state.users.map(u => [
+			csvEscape(u.id),
+			csvEscape(u.name),
+			csvEscape(u.email)
+		].join(','));
+		const usersCsv = usersHeader.join(',') + '\n' + usersRows.join('\n');
+		downloadFile(`users-${new Date().toISOString().slice(0,10)}.csv`, usersCsv, 'text/csv');
+
+	} catch (err) {
+		alert('Error al exportar CSV: ' + err.message);
+	}
+}
+
+function renderStats(rootView) {
+  rootView.innerHTML = `
+  <div class="card">
+    <div class="view-header" style="align-items: center; justify-content: space-between;">
+      <div>
+        <h2><i class="fas fa-chart-bar"></i> Estadísticas de Canciones</h2>
+        <p style="margin:0; color: var(--text-muted);">Visor de métricas básicas y gráficos</p>
+      </div>
+      <div>
+        <button id="refresh-stats" class="btn btn-primary"><i class="fas fa-sync-alt"></i> Refrescar</button>
+      </div>
+    </div>
+    <div style="padding:16px;">
+      <div id="stats-root"></div>
+    </div>
+  </div>
+  `;
+  const container = document.getElementById('stats-root');
+  container.innerHTML = '<div style="color:var(--text-muted)">Cargando estadísticas...</div>';
+
+  function renderOnceReady() {
+    try {
+      if (window.renderSongStats && typeof window.renderSongStats === 'function') {
+        window.renderSongStats(container, state.songs || []);
+      } else {
+        container.innerHTML = '<div style="color:var(--text-muted)">No se encontró la función de renderizado de estadísticas.</div>';
+      }
+    } catch (err) {
+      container.innerHTML = `<div style="color:var(--text-muted)">Error al renderizar estadísticas: ${err.message}</div>`;
+      console.error('renderStats error', err);
+    }
+  }
+
+  if (window.renderSongStats && typeof window.renderSongStats === 'function') {
+    renderOnceReady();
+  } else {
+    // Cargar charts.js dinámicamente desde la misma carpeta que app.js
+    const existingScript = Array.from(document.getElementsByTagName('script')).find(s => s.src && s.src.endsWith('/charts.js') || s.getAttribute('data-charts-loaded')==='1');
+    if (existingScript) {
+      // Esperar a que esté disponible (por si aún se está cargando)
+      const waitInterval = setInterval(() => {
+        if (window.renderSongStats) {
+          clearInterval(waitInterval);
+          renderOnceReady();
+        }
+      }, 150);
+      // fallback con timeout
+      setTimeout(() => { clearInterval(waitInterval); if (!window.renderSongStats) container.innerHTML = '<div style="color:var(--text-muted)">No se pudo cargar el módulo de estadísticas.</div>'; }, 5000);
+    } else {
+      const script = document.createElement('script');
+      script.src = './charts.js';
+      script.async = true;
+      // marcar para evitar intentos duplicados
+      script.setAttribute('data-charts-loaded', '1');
+      script.onload = () => {
+        // pequeño retardo para asegurar que la variable global esté definida
+        setTimeout(() => {
+          renderOnceReady();
+        }, 50);
+      };
+      script.onerror = () => {
+        container.innerHTML = '<div style="color:var(--text-muted)">Error al cargar charts.js</div>';
+        console.error('Error loading charts.js');
+      };
+      document.body.appendChild(script);
+    }
+  }
+
+  document.getElementById('refresh-stats').onclick = () => {
+    if (window.renderSongStats) window.renderSongStats(container, state.songs || []);
+    else {
+      // reintentar carga si no está presente
+      container.innerHTML = '<div style="color:var(--text-muted)">Cargando módulo de estadísticas...</div>';
+      const old = document.querySelector('script[data-charts-loaded="1"]');
+      if (old) old.remove();
+      const s = document.createElement('script');
+      s.src = './charts.js';
+      s.async = true;
+      s.setAttribute('data-charts-loaded', '1');
+      s.onload = () => setTimeout(() => window.renderSongStats && window.renderSongStats(container, state.songs || []), 50);
+      s.onerror = () => container.innerHTML = '<div style="color:var(--text-muted)">No se pudo cargar charts.js</div>';
+      document.body.appendChild(s);
+    }
+  };
 }
 
 

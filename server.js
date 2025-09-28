@@ -90,7 +90,7 @@ app.post('/api/auth/login', (req, res) => {
     }
 });
 
-// Serve the main HTML file for all routes (SPA support)
+
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'render', 'index.html'));
 });

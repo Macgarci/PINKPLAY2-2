@@ -27,9 +27,6 @@ Una aplicación moderna de gestión musical que funciona tanto en **escritorio**
 - **Font Awesome 6.4.0**: Biblioteca de iconos
 
 ### Almacenamiento
-- **JSON**: Base de datos ligera para desarrollo
-- **LocalStorage**: Persistencia de sesión de usuario
-- **SHA-256**: Hash seguro de contraseñas
 
 ## 🚀 Instalación y Configuración
 
