@@ -28,24 +28,66 @@ Una aplicación moderna de gestión musical que funciona tanto en **escritorio**
 
 ### Almacenamiento
 
-## 🚀 Instalación y Configuración
+## 🚀 Instalación y Configuración (actualizado)
 
 ### Prerrequisitos
-- **Node.js** v14 o superior
-- **npm** v6 o superior
+- Node.js v14 o superior (recomendado: la última LTS)
+- npm v6 o superior
 
-### Pasos de Instalación
+Nota: comprueba la versión instalada con:
+```bash
+node -v
+npm -v
+```
 
-1. **Clonar o descargar** el proyecto:
-   ```bash
-   git clone <repository-url>
-   cd MusicPINK
-   ```
+### Pasos rápidos de instalación
 
-2. **Instalar dependencias**:
-   ```bash
-   npm install
-   ```
+1. Clona el repositorio y entra en la carpeta del proyecto:
+```bash
+git clone <repository-url>
+cd MusicPINK
+```
+
+2. Instala dependencias
+- Si quieres una instalación reproducible (usa package-lock.json):
+```bash
+npm ci
+```
+- Si prefieres la instalación normal:
+```bash
+npm install
+```
+
+3. Ejecuta la aplicación según el modo:
+
+- Modo escritorio (Electron):
+```bash
+npm run desktop
+# o
+npm start
+```
+
+- Modo web (Express):
+```bash
+npm run web
+# luego abrir http://localhost:3000
+```
+
+- Desarrollo con recarga:
+```bash
+npm run dev
+```
+
+### Problemas comunes al ejecutar `npm install`
+- Si falla la compilación de módulos nativos en Windows/desktop, instala las herramientas de build:
+  - Windows: instala las Build Tools de Visual Studio (o ejecuta: `npm install --global windows-build-tools` en PowerShell con permisos de administrador, opcional).
+  - macOS / Linux: asegúrate de tener `make`, `gcc` y las librerías de desarrollo instaladas.
+
+- Si ves muchas diferencias tras `npm ci`, elimina `node_modules` y vuelve a ejecutar:
+```bash
+rm -rf node_modules
+npm ci
+```
 
 ## 💻 Modos de Ejecución
 
